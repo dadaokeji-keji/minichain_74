@@ -33,7 +33,7 @@ MiniChain 的目标很朴素：**`git clone` 之后 10 秒内看到一条真实�
 git clone https://github.com/dadaokeji-keji/minichain_74.git
 cd minichain_74
 
-# 2. 运行完整演示（无需安装任何依赖，默认挖矿难度 4）
+# 2. 运行完整演示（Python 3.9+，无需安装任何依赖，默认挖矿难度 4）
 python -m minichain demo
 ```
 
