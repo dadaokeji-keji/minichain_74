@@ -73,6 +73,7 @@ MiniChain v1.0.0 · 迷你区块链演示
 | `python -m minichain show` | 以表格形式打印整条链 |
 | `python -m minichain export -o chain.json` | 把链导出为 JSON |
 | `python -m minichain benchmark` | 测试难度 1~4 的平均出块耗时 |
+| `python -m minichain benchmark` | 测试难度 1~4 的平均出块耗时 |
 | `python -m minichain --load chain.json show` | 从 JSON 载入后查看 |
 
 通用参数：`-d/--difficulty` 指定挖矿难度（默认 4），`-v/--version` 查看版本。

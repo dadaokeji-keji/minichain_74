@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
+import unicodedata
 
 from . import __version__
 from .block import Block
@@ -23,6 +24,32 @@ from .chain import Blockchain
 
 def _fmt_seconds(seconds: float) -> str:
     return f"{seconds * 1000:.0f} ms"
+
+
+def _display_width(text: str) -> int:
+    """按终端显示宽度计算字符串宽度（中文/全角字符占 2 列）。"""
+    return sum(2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1 for ch in text)
+
+
+def _pad(text: str, width: int, right: bool = False) -> str:
+    """把 text 补齐到指定显示宽度。"""
+    padding = max(0, width - _display_width(text))
+    return (" " * padding + text) if right else (text + " " * padding)
+
+
+def _print_table(header: tuple[str, ...], rows: list[tuple[str, ...]]) -> None:
+    """打印一张按显示宽度对齐的简单表格。"""
+    widths = [_display_width(cell) for cell in header]
+    for row in rows:
+        widths = [max(widths[i], _display_width(cell)) for i, cell in enumerate(row)]
+    widths = [w + 4 for w in widths]
+    print("".join(_pad(cell, widths[i]) for i, cell in enumerate(header)).rstrip())
+    for row in rows:
+        print(
+            "".join(
+                _pad(cell, widths[i], right=i > 0) for i, cell in enumerate(row)
+            ).rstrip()
+        )
 
 
 def cmd_demo(args: argparse.Namespace) -> int:
@@ -109,7 +136,7 @@ def cmd_export(args: argparse.Namespace) -> int:
 
 def cmd_benchmark(args: argparse.Namespace) -> int:
     """测量不同难度下的平均出块耗时，帮助学生建立「难度」的直觉。"""
-    print(f"{'难度':<6}{'期望尝试次数':>12}{'平均耗时':>12}")
+    rows: list[tuple[str, str, str]] = []
     for difficulty in range(1, args.max_difficulty + 1):
         costs = []
         for _ in range(args.rounds):
@@ -123,7 +150,9 @@ def cmd_benchmark(args: argparse.Namespace) -> int:
             block.mine()
             costs.append(time.perf_counter() - start)
         avg = sum(costs) / len(costs)
-        print(f"{difficulty:<6}{16 ** difficulty:>12}{_fmt_seconds(avg):>12}")
+        rows.append((str(difficulty), str(16 ** difficulty), _fmt_seconds(avg)))
+
+    _print_table(("难度", "期望尝试次数", "平均耗时"), rows)
     print("\n提示：难度每 +1，期望尝试次数约为原来的 16 倍。")
     return 0
 
